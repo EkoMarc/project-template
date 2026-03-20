@@ -184,6 +184,7 @@ a:hover { text-decoration: underline; }
 ul, ol { padding-left: 24px; margin-bottom: 14px; line-height: 1.7; }
 li { margin-bottom: 2px; }
 hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+input[type="checkbox"] { margin-right: 6px; vertical-align: middle; accent-color: var(--primary); }
 """
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -230,12 +231,19 @@ def wrap_tables(html):
     """Wrap tables in a scroll container for overflow handling."""
     return html.replace("<table>", '<div class="table-wrap"><table>').replace("</table>", "</table></div>")
 
+def preprocess_tasklists(text):
+    """Convert - [ ] and - [x] to HTML checkboxes before markdown parsing."""
+    text = re.sub(r"^(\s*)-\s+\[x\]\s+", r"\1- <input type='checkbox' checked disabled> ", text, flags=re.MULTILINE)
+    text = re.sub(r"^(\s*)-\s+\[ \]\s+", r"\1- <input type='checkbox' disabled> ", text, flags=re.MULTILINE)
+    return text
+
 def render_md(text):
     text = strip_comments(text)
+    text = preprocess_tasklists(text)
     if MD_AVAILABLE:
-        html = md_lib.markdown(text, extensions=["tables", "fenced_code", "nl2br"])
+        # Note: no nl2br — it inserts <br> tags that break list parsing
+        html = md_lib.markdown(text, extensions=["tables", "fenced_code"])
     else:
-        # Fallback: handle headings, bold, inline code, and basic tables
         html = _fallback_render(text)
     html = rewrite_md_links(html)
     html = wrap_tables(html)
@@ -273,7 +281,7 @@ def _fallback_render(text):
             while i < len(lines) and not lines[i].startswith("```"):
                 code_lines.append(lines[i])
                 i += 1
-            out.append(f"<pre><code>{'chr(10)'.join(code_lines)}</code></pre>")
+            out.append(f"<pre><code>{chr(10).join(code_lines)}</code></pre>")
             i += 1
             continue
 
