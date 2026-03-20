@@ -12,10 +12,12 @@ fi
 
 python3 -c "import markdown" 2>/dev/null || pip3 install markdown --quiet
 
-echo "Starting project dashboard at http://localhost:3100"
+echo "Starting project dashboard..."
 echo "Press Ctrl+C to stop."
 
-# Try to open browser (works on Mac, Linux with xdg-open)
-(sleep 1.5 && (open http://localhost:3100 2>/dev/null || xdg-open http://localhost:3100 2>/dev/null || true)) &
+PORT=3100
+while lsof -ti:$PORT &>/dev/null; do PORT=$((PORT+1)); done
+
+(sleep 1.5 && (open "http://localhost:$PORT" 2>/dev/null || xdg-open "http://localhost:$PORT" 2>/dev/null || true)) &
 
 python3 scripts/dashboard.py

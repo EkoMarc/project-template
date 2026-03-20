@@ -6,9 +6,13 @@ Serves docs/ as a styled website at http://localhost:3100
 Usage: python3 scripts/dashboard.py
 """
 
+import hashlib
 import http.server
 import re
+import socket
 import sys
+import threading
+import time
 import urllib.parse
 from pathlib import Path
 
@@ -25,9 +29,39 @@ except ImportError:
     except ImportError:
         MD_AVAILABLE = False
 
-PORT = 3100
+PORT_START = 3100
 ROOT = Path(__file__).parent.parent
 DOCS_DIR = ROOT / "docs"
+
+# ── Live reload state ─────────────────────────────────────────────────────────
+_reload_token = str(time.time())
+_file_hashes: dict = {}
+
+def _hash_docs():
+    h = {}
+    for f in DOCS_DIR.glob("*.md"):
+        try:
+            h[str(f)] = hashlib.md5(f.read_bytes()).hexdigest()
+        except OSError:
+            pass
+    return h
+
+def _watch_loop():
+    global _reload_token, _file_hashes
+    _file_hashes = _hash_docs()
+    while True:
+        time.sleep(1)
+        current = _hash_docs()
+        if current != _file_hashes:
+            _file_hashes = current
+            _reload_token = str(time.time())
+
+def _find_port(start: int) -> int:
+    for port in range(start, start + 10):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            if s.connect_ex(("localhost", port)) != 0:
+                return port
+    return start
 
 TOP_LEVEL_PAGES = ["overview", "tasks", "context", "decisions", "stack", "workflows"]
 PAGE_LABELS = {
@@ -267,6 +301,20 @@ def render_page(slug, content_html, project_name):
     all_pages = top_pages + secondary_pages
     page_label = dict(all_pages).get(slug, slug.replace("-", " ").title())
 
+    reload_js = """
+<script>
+(function(){
+  var t = null;
+  function check(){
+    fetch('/__reload_token__').then(r=>r.text()).then(tok=>{
+      if(t === null){ t = tok; } else if(tok !== t){ location.reload(); }
+      setTimeout(check, 1200);
+    }).catch(()=>{ setTimeout(check, 3000); });
+  }
+  check();
+})();
+</script>"""
+
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -284,6 +332,7 @@ def render_page(slug, content_html, project_name):
 <main>
 {content_html}
 </main>
+{reload_js}
 </body>
 </html>"""
 
@@ -295,6 +344,14 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = urllib.parse.urlparse(self.path).path.strip("/")
+
+        if path == "__reload_token__":
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain")
+            self.end_headers()
+            self.wfile.write(_reload_token.encode())
+            return
+
         if not path:
             path = "overview"
 
@@ -328,7 +385,11 @@ if __name__ == "__main__":
         print(f"Error: docs/ folder not found at {DOCS_DIR}")
         sys.exit(1)
 
-    print(f"Dashboard → http://localhost:{PORT}")
+    PORT = _find_port(PORT_START)
+
+    threading.Thread(target=_watch_loop, daemon=True).start()
+
+    print(f"Dashboard → http://localhost:{PORT}  (auto-reloads on file save)")
     print("Ctrl+C to stop.")
 
     server = http.server.HTTPServer(("", PORT), DashboardHandler)

@@ -17,12 +17,14 @@ fi
 python3 -c "import markdown" 2>/dev/null || pip3 install markdown --quiet
 
 echo "Starting project dashboard..."
-echo "Opening http://localhost:3100"
-echo ""
 echo "Leave this window open. Press Ctrl+C to stop."
 echo ""
 
-# Open browser after short delay
-(sleep 1.5 && open http://localhost:3100) &
+# Find the port dashboard.py will use (mirrors _find_port logic)
+PORT=3100
+while lsof -ti:$PORT &>/dev/null; do PORT=$((PORT+1)); done
+
+# Open browser after short delay on the right port
+(sleep 1.5 && open "http://localhost:$PORT") &
 
 python3 scripts/dashboard.py

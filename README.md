@@ -7,7 +7,7 @@
 ## What is this?
 
 This is the project workspace for [Project Name]. It includes:
-- A **local dashboard** where you can view project docs, tasks, and status — no code required
+- A **local dashboard** to view docs, tasks, and status — no code required
 - **AI agent instructions** so Claude and other AI tools automatically understand the project
 - **Scripts** that handle setup, collaboration, and repetitive tasks automatically
 
@@ -20,75 +20,91 @@ Open **Terminal** and paste:
 ```
 ./scripts/setup.sh
 ```
-This installs what you need. You only do this once.
+You only do this once. It installs what the dashboard needs to run.
 
 > **How to open Terminal on Mac:** Press `Cmd + Space`, type "Terminal", press Enter.
 
 ### Step 2 — Open the project dashboard
 Double-click **`Start.command`** in this folder.
 
-A browser window will open at `http://localhost:3100` — this is your project dashboard. Leave the terminal window that opens running in the background.
+Your browser opens automatically — this is your project dashboard. Leave the terminal window running in the background while you work.
 
-> To stop the dashboard: click the terminal window and press `Ctrl+C`.
-> To restart: double-click `Start.command` again.
+> To stop: click the terminal window and press `Ctrl+C`
+> To reopen: double-click `Start.command` again
 
 ### Step 3 — Fill in your project details
-In the dashboard, open **Context** and describe the problem you're solving. This helps the AI understand your goals before it starts working.
+In the dashboard, open **Context** and answer the scoping questions. This is what the AI reads to understand your project before starting work.
+
+---
+
+## Starting a new project from this template
+
+### Option A — Double-click (easiest)
+Double-click **`New Project.command`** in this folder.
+
+Terminal will open and ask you three questions:
+1. What's the project name?
+2. What type is it? (planning / prototype / script / product)
+3. Where do you want to create it?
+
+It then creates the project, opens its dashboard, and you're ready to go.
+
+### Option B — Terminal command
+```
+./scripts/new-project.sh my-project-name product ~/Projects
+```
+
+### What's the difference between this and just copying the folder?
+Both work. The difference: this script copies only the files relevant to your project type (a planning project doesn't need Docker setup or environment variables), pre-fills your project name everywhere, and runs `git init` automatically. Copying the folder is fine too — just delete `docs/template-context.md` afterward (it's about this template, not your project) and fill in `AGENTS.md` manually.
 
 ---
 
 ## Working with AI
 
-### When to use Claude Code (terminal)
-Use Claude Code when you want the AI to **write, read, or change files** in this project — building features, fixing bugs, generating content, running scripts.
+### Claude Code (makes changes to files)
+Use this when you want the AI to write, build, fix, or generate anything in the project.
 
-**How to start:**
 1. Open Terminal
-2. Navigate to this folder: `cd path/to/[project-name]`
-3. Type: `claude`
+2. `cd path/to/your-project`
+3. `claude`
 
-Claude Code will automatically load `AGENTS.md` and understand your project.
+Claude Code automatically reads `AGENTS.md` and understands your project.
 
-### When to use Claude.ai (chat)
-Use the web chat at claude.ai when you want to **talk through ideas**, ask questions, or get explanations — without making changes to files.
+### Claude.ai chat (ideas and questions)
+Use the web chat when you want to think through a problem, ask questions, or get explanations — without the AI touching any files.
 
-### Connecting this project to Claude Desktop (optional)
-If you use the Claude Desktop app and want it to have context about this project:
+### Connecting to Claude Desktop (optional)
+To give the Claude Desktop app access to your project files:
 
 1. Open Claude Desktop → Settings → Developer → Edit Config
-2. Add this project folder as a filesystem MCP source:
+2. Add:
 ```json
 {
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/[project-name]"]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/your-project"]
     }
   }
 }
 ```
-3. Restart Claude Desktop
-4. Claude will now be able to read and reference files in this project from the chat interface
+3. Restart Claude Desktop — it can now read and reference your files in chat
 
 ---
 
-## For teams and developers
+## For teams
 
-### Sharing with your team
-To set up a containerized environment that anyone can run with one command:
+### Share a working environment
 ```
 ./scripts/containerize.sh
 ```
-Then commit the generated `Dockerfile` and `docker-compose.yml`. Team members run:
-```
-docker compose up
-```
+Generates a `Dockerfile` and `docker-compose.yml`. Edit the Dockerfile for your stack, then commit. Teammates run `docker compose up` to get started.
 
-### Adding scripts
-Automate anything you do more than once. Add scripts to `scripts/` and document them in `scripts/README.md`. The AI is instructed to do the same.
+### Adding automation
+Add scripts to `scripts/` and document them in `scripts/README.md`. The AI is instructed to do the same.
 
 ### Branching and contributing
-See **Workflows** in the dashboard for the full git and collaboration process.
+See **Workflows** in the dashboard.
 
 ---
 
@@ -96,55 +112,25 @@ See **Workflows** in the dashboard for the full git and collaboration process.
 
 | Folder / File | What it is |
 |---------------|-----------|
-| `docs/` | Project documentation — view it in the dashboard |
+| `docs/` | Project documentation — view in the dashboard |
 | `src/` | Project source code |
-| `scripts/` | Automation — `scripts/README.md` lists all available scripts |
-| `AGENTS.md` | Instructions for AI agents working on this project |
-| `CLAUDE.md` | Claude Code entry point (points to AGENTS.md) |
-| `.env.example` | Template for environment variables — copy to `.env` |
-
----
-
-## Using this as a template for a new project
-
-### Option A — Scaffold script (recommended)
-```
-./scripts/new-project.sh my-project-name product ~/Projects
-```
-Types: `planning` `prototype` `script` `product`
-
-Creates a new folder with only the files relevant to that type, pre-fills the project name, and initialises a git repo.
-
-### Option B — Duplicate manually
-1. Copy this entire folder to a new location and rename it
-2. Delete `docs/template-context.md` (it's about the template itself, not your project)
-3. Open `AGENTS.md` — fill in mission, type, and status
-4. Open `docs/context.md` — answer the Scoping Questions
-5. Run `git init` in the new folder
-
-### Running multiple projects at once
-Each project's dashboard runs on port `3100` by default. If you need two open simultaneously, change the port in one project's `scripts/dashboard.py`:
-```python
-PORT = 3101  # near the top of the file
-```
-Update `Start.command` and `start.sh` in that same project to open the correct URL.
+| `scripts/` | Automation scripts — see `scripts/README.md` |
+| `AGENTS.md` | AI agent instructions for this project |
+| `CLAUDE.md` | Claude Code entry point (redirects to AGENTS.md) |
+| `.env.example` | Environment variable template — copy to `.env` and fill in |
 
 ---
 
 ## Troubleshooting
 
 **Dashboard doesn't open:**
-Make sure Python 3 is installed. In Terminal: `python3 --version`
-If not installed: https://python.org/downloads
+Make sure Python 3 is installed — in Terminal: `python3 --version`
+If missing: https://python.org/downloads
 
 **"Permission denied" running a script:**
 ```
 chmod +x scripts/setup.sh && ./scripts/setup.sh
 ```
 
-**Port 3100 already in use:**
-Another dashboard instance is running. Find and stop it:
-```
-lsof -ti:3100 | xargs kill
-```
-Then relaunch.
+**Two projects open at the same time:**
+No action needed — the dashboard automatically picks a free port if 3100 is taken.
