@@ -105,6 +105,32 @@ See **Workflows** in the dashboard for the full git and collaboration process.
 
 ---
 
+## Using this as a template for a new project
+
+### Option A — Scaffold script (recommended)
+```
+./scripts/new-project.sh my-project-name product ~/Projects
+```
+Types: `planning` `prototype` `script` `product`
+
+Creates a new folder with only the files relevant to that type, pre-fills the project name, and initialises a git repo.
+
+### Option B — Duplicate manually
+1. Copy this entire folder to a new location and rename it
+2. Delete `docs/template-context.md` (it's about the template itself, not your project)
+3. Open `AGENTS.md` — fill in mission, type, and status
+4. Open `docs/context.md` — answer the Scoping Questions
+5. Run `git init` in the new folder
+
+### Running multiple projects at once
+Each project's dashboard runs on port `3100` by default. If you need two open simultaneously, change the port in one project's `scripts/dashboard.py`:
+```python
+PORT = 3101  # near the top of the file
+```
+Update `Start.command` and `start.sh` in that same project to open the correct URL.
+
+---
+
 ## Troubleshooting
 
 **Dashboard doesn't open:**

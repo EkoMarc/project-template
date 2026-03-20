@@ -11,17 +11,14 @@
 
 ---
 
-> ### Agent Rules — required behavior
-> 1. Update `docs/tasks.md` at the **start AND end** of every session.
-> 2. Before any multi-step task: write a brief plan (3–5 lines) in `docs/tasks.md` first.
-> 3. Before writing custom code: check `docs/stack.md`, then search for an existing library or tool.
-> 4. Any command you run more than once → script it and add an entry to `scripts/README.md`.
-> 5. Log non-obvious decisions in `docs/decisions.md`.
-> 6. If `docs/context.md` Scoping Questions are unanswered: **ask the user** before touching any files or making structural decisions.
-> 7. If project scope seems multi-service or is growing beyond a single focus: read `docs/workflows.md` → Structural Decisions before creating folders or services.
-> 8. Keep relevant docs updated as you work. Don't leave them stale.
+> ### Agent Rules
+> 1. Update `docs/tasks.md` at the **start AND end** of every session. Write a plan there before any multi-step task.
+> 2. Before writing custom code: check `docs/stack.md`, then search for an existing library. Script any command you run more than once and add it to `scripts/README.md`.
+> 3. Log non-obvious decisions in `docs/decisions.md`. Keep docs updated as you work.
+> 4. If `docs/context.md` Scoping Questions are unanswered: **ask the user first** — don't touch files or make structural decisions.
+> 5. If scope seems multi-service or is growing beyond a single focus: read `docs/workflows.md` → Structural Decisions before creating folders or services.
 >
-> **Skip:** `README.md` (human setup only). `Start.command` / `start.sh` are launcher scripts.
+> **Skip:** `README.md`, `Start.command`, `start.sh` — human-facing files only.
 
 ---
 

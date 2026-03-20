@@ -240,85 +240,13 @@ def preprocess_tasklists(text):
 def render_md(text):
     text = strip_comments(text)
     text = preprocess_tasklists(text)
-    if MD_AVAILABLE:
-        # Note: no nl2br — it inserts <br> tags that break list parsing
-        html = md_lib.markdown(text, extensions=["tables", "fenced_code"])
-    else:
-        html = _fallback_render(text)
+    if not MD_AVAILABLE:
+        print("Error: 'markdown' package not installed. Run: pip3 install markdown")
+        sys.exit(1)
+    html = md_lib.markdown(text, extensions=["tables", "fenced_code"])
     html = rewrite_md_links(html)
     html = wrap_tables(html)
     return html
-
-def _fallback_render(text):
-    """Minimal renderer used only when the markdown package is unavailable."""
-    lines = text.splitlines()
-    out = []
-    in_table = False
-    in_pre = False
-    buf = []
-
-    def flush_para():
-        if buf:
-            content = " ".join(buf).strip()
-            if content:
-                out.append(f"<p>{inline(content)}</p>")
-            buf.clear()
-
-    def inline(s):
-        s = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", s)
-        s = re.sub(r"`([^`]+)`", r"<code>\1</code>", s)
-        s = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', s)
-        return s
-
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-
-        if line.startswith("```"):
-            flush_para()
-            code_lines = []
-            i += 1
-            while i < len(lines) and not lines[i].startswith("```"):
-                code_lines.append(lines[i])
-                i += 1
-            out.append(f"<pre><code>{chr(10).join(code_lines)}</code></pre>")
-            i += 1
-            continue
-
-        if line.startswith("# "):
-            flush_para(); out.append(f"<h1>{inline(line[2:])}</h1>"); i += 1; continue
-        if line.startswith("## "):
-            flush_para(); out.append(f"<h2>{inline(line[3:])}</h2>"); i += 1; continue
-        if line.startswith("### "):
-            flush_para(); out.append(f"<h3>{inline(line[4:])}</h3>"); i += 1; continue
-        if line.startswith("> "):
-            flush_para(); out.append(f"<blockquote><p>{inline(line[2:])}</p></blockquote>"); i += 1; continue
-        if line.startswith("---"):
-            flush_para(); out.append("<hr>"); i += 1; continue
-        if line.startswith("| "):
-            flush_para()
-            rows = []
-            while i < len(lines) and lines[i].startswith("|"):
-                if not re.match(r"^\|[-| :]+\|$", lines[i]):
-                    rows.append(lines[i])
-                i += 1
-            if rows:
-                th_cells = [f"<th>{inline(c.strip())}</th>" for c in rows[0].split("|")[1:-1]]
-                table_html = f"<table><thead><tr>{''.join(th_cells)}</tr></thead><tbody>"
-                for row in rows[1:]:
-                    td_cells = [f"<td>{inline(c.strip())}</td>" for c in row.split("|")[1:-1]]
-                    table_html += f"<tr>{''.join(td_cells)}</tr>"
-                table_html += "</tbody></table>"
-                out.append(table_html)
-            continue
-        if line.strip() == "":
-            flush_para(); i += 1; continue
-
-        buf.append(line)
-        i += 1
-
-    flush_para()
-    return "\n".join(out)
 
 def render_page(slug, content_html, project_name):
     top_pages, secondary_pages = get_nav_pages()
