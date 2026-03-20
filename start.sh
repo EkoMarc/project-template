@@ -10,7 +10,9 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-python3 -c "import markdown" 2>/dev/null || pip3 install markdown --quiet
+python3 -c "import markdown" 2>/dev/null || \
+    pip3 install --user markdown --quiet 2>/dev/null || \
+    pip3 install --user --break-system-packages markdown --quiet 2>/dev/null || true
 
 echo "Starting project dashboard..."
 echo "Press Ctrl+C to stop."

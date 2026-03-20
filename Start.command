@@ -14,7 +14,9 @@ if ! command -v python3 &> /dev/null; then
 fi
 
 # Install markdown package if missing
-python3 -c "import markdown" 2>/dev/null || pip3 install markdown --quiet
+python3 -c "import markdown" 2>/dev/null || \
+    pip3 install --user markdown --quiet 2>/dev/null || \
+    pip3 install --user --break-system-packages markdown --quiet 2>/dev/null || true
 
 echo "Starting project dashboard..."
 echo "Leave this window open. Press Ctrl+C to stop."

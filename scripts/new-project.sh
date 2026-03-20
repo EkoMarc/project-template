@@ -16,22 +16,28 @@ PROJECT_NAME="${1:-}"
 PROJECT_TYPE="${2:-product}"
 DEST_PARENT="${3:-}"
 
-if [ -z "$PROJECT_NAME" ]; then
-    echo "Usage: ./scripts/new-project.sh <project-name> <type> [destination]"
-    echo "Types: planning | prototype | script | product"
-    exit 1
-fi
-
 TEMPLATE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 if [ -z "$DEST_PARENT" ]; then
     DEST_PARENT="$(dirname "$TEMPLATE_DIR")"
 fi
 
+# Default name: "new-project", incrementing to "new-project-2" etc. if exists
+if [ -z "$PROJECT_NAME" ]; then
+    PROJECT_NAME="new-project"
+    if [ -d "$DEST_PARENT/$PROJECT_NAME" ]; then
+        n=2
+        while [ -d "$DEST_PARENT/new-project-$n" ]; do
+            n=$((n + 1))
+        done
+        PROJECT_NAME="new-project-$n"
+    fi
+fi
+
 TARGET_DIR="$DEST_PARENT/$PROJECT_NAME"
 
 if [ -d "$TARGET_DIR" ]; then
-    echo "Error: $TARGET_DIR already exists."
+    echo "Error: $TARGET_DIR already exists. Choose a different name."
     exit 1
 fi
 

@@ -16,18 +16,23 @@ import time
 import urllib.parse
 from pathlib import Path
 
-# Install markdown if missing
+# Install markdown if missing (--user handles externally-managed Python on macOS/Linux)
 try:
     import markdown as md_lib
-    MD_AVAILABLE = True
 except ImportError:
     import subprocess
-    subprocess.run([sys.executable, "-m", "pip", "install", "markdown", "-q"], check=False)
+    for flags in [["--user"], ["--break-system-packages", "--user"], []]:
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "install", "markdown", "-q"] + flags,
+            capture_output=True
+        )
+        if result.returncode == 0:
+            break
     try:
         import markdown as md_lib
-        MD_AVAILABLE = True
     except ImportError:
-        MD_AVAILABLE = False
+        print("Error: could not install 'markdown'. Run: pip3 install --user markdown")
+        sys.exit(1)
 
 PORT_START = 3100
 ROOT = Path(__file__).parent.parent
@@ -274,9 +279,6 @@ def preprocess_tasklists(text):
 def render_md(text):
     text = strip_comments(text)
     text = preprocess_tasklists(text)
-    if not MD_AVAILABLE:
-        print("Error: 'markdown' package not installed. Run: pip3 install markdown")
-        sys.exit(1)
     html = md_lib.markdown(text, extensions=["tables", "fenced_code"])
     html = rewrite_md_links(html)
     html = wrap_tables(html)

@@ -23,7 +23,10 @@ fi
 # ── 2. Python dependencies ──────────────────────────────────────────────────
 if command -v python3 &> /dev/null; then
     echo "✓ Python 3 found: $(python3 --version)"
-    python3 -c "import markdown" 2>/dev/null || pip3 install markdown --quiet && echo "✓ markdown package ready"
+    python3 -c "import markdown" 2>/dev/null || \
+        pip3 install --user markdown --quiet 2>/dev/null || \
+        pip3 install --user --break-system-packages markdown --quiet 2>/dev/null || true
+    python3 -c "import markdown" 2>/dev/null && echo "✓ markdown package ready" || echo "⚠ markdown install failed — dashboard may not work"
 else
     echo "✗ Python 3 not found — install from https://python.org/downloads"
     exit 1
