@@ -17,8 +17,9 @@
 > 3. Before writing custom code: check `docs/stack.md`, then search for an existing library or tool.
 > 4. Any command you run more than once → script it and add an entry to `scripts/README.md`.
 > 5. Log non-obvious decisions in `docs/decisions.md`.
-> 6. If `docs/context.md` has no problem statement: **ask the user** to describe the problem they're solving before starting work.
-> 7. Keep relevant docs updated as you work. Don't leave them stale.
+> 6. If `docs/context.md` Scoping Questions are unanswered: **ask the user** before touching any files or making structural decisions.
+> 7. If project scope seems multi-service or is growing beyond a single focus: read `docs/workflows.md` → Structural Decisions before creating folders or services.
+> 8. Keep relevant docs updated as you work. Don't leave them stale.
 >
 > **Skip:** `README.md` (human setup only). `Start.command` / `start.sh` are launcher scripts.
 

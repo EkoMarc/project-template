@@ -1,8 +1,45 @@
 # Standard Workflows
 
-<!-- Agents: Follow the relevant workflow for your task type.
+<!-- Agents: Read "Structural Decisions" first if project scope is unclear or growing.
+     Follow the relevant workflow for your task type.
      Update or add a workflow when a new repeatable process is established.
      This is the "don't reinvent the wheel" reference. -->
+
+---
+
+## Structural Decisions
+
+<!-- Agents: Work through these before creating folders, services, or sub-projects.
+     Answer each question using what you know from docs/context.md.
+     If you can't answer a question, ask the user before proceeding. -->
+
+### Is this one project or multiple?
+| Signal | Structure |
+|--------|-----------|
+| One problem, one team, one deploy target | Single project — you're done here |
+| Multiple services that could run independently | Monorepo with service folders, each with its own `AGENTS.md` |
+| Different teams or codebases needing total isolation | Separate repos, each cloned from this template |
+
+### Does a sub-project need its own full template?
+- Independent owner, weeks of autonomous work, or separate deploy → own `AGENTS.md` + `docs/`
+- Tightly coupled, ships with the parent, same team → just a folder + section in parent `tasks.md`
+
+### When to create a service folder
+Ask: could someone use just this folder independently?
+- Yes → service folder with its own `AGENTS.md` pointing to parent for shared context
+- No → it's a module, keep it in `src/`
+
+### When to add a dashboard tab for a service
+- Has its own docs, generated output, or components humans need to browse → add a tab
+- Pure source consumed by other services → no tab needed
+
+### When does a prototype graduate to a product?
+- Needs real auth, data persistence, or a CI/CD pipeline → switch type to `product` in `AGENTS.md`
+- Still throwaway or exploratory → stay as `prototype`, keep it lightweight
+
+### Monorepo vs separate repos
+- Services share a design system, tokens, or components → monorepo, reference by relative path
+- Services have completely different stacks or ship on different cadences → separate repos
 
 ---
 
